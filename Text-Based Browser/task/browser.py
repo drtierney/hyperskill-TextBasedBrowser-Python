@@ -1,3 +1,6 @@
+import os
+import argparse
+
 
 nytimes_com = '''
 This New Liquid Is Magnetic, and Mesmerizing
@@ -35,8 +38,32 @@ Twitter and Square Chief Executive Officer Jack Dorsey
 '''
 
 # write your code here
+parser = argparse.ArgumentParser()
+parser.add_argument("dir_for_files")
+args = parser.parse_args()
+
+if not os.access(args.dir_for_files, os.F_OK):
+    os.mkdir(args.dir_for_files)
+
+urls = {"bloomberg.com": bloomberg_com, "nytimes.com": nytimes_com}
+tabs = set()
+
 while True:
     url = input()
+    site = url.split(".")[0]
+    filepath = os.path.join(args.dir_for_files, site)
+
     if url == "exit":
-        break
-    print(eval(url.replace(".", "_")))
+        exit()
+    if url in urls.keys() and site not in tabs:
+        print(urls[url])
+        with open(filepath, "w") as f:
+            f.write(urls[url])
+        tabs.add(site)
+    if site in tabs:
+        with open(filepath, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                print(line.strip())
+    else:
+        print("Error: Incorrect URL")
