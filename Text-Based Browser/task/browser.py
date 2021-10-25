@@ -1,5 +1,6 @@
 import os
 import argparse
+from collections import deque
 
 
 nytimes_com = '''
@@ -47,23 +48,28 @@ if not os.access(args.dir_for_files, os.F_OK):
 
 urls = {"bloomberg.com": bloomberg_com, "nytimes.com": nytimes_com}
 tabs = set()
-
+stack = deque()
 while True:
     url = input()
     site = url.split(".")[0]
     filepath = os.path.join(args.dir_for_files, site)
-
     if url == "exit":
         exit()
+    if url == "back":
+        last_page = stack.pop()
+        if last_page != stack[-1]:
+            url = stack.pop()
     if url in urls.keys() and site not in tabs:
-        print(urls[url])
+        print(urls[url].strip())
         with open(filepath, "w") as f:
-            f.write(urls[url])
+            f.write(urls[url].strip())
         tabs.add(site)
-    if site in tabs:
+        stack.append(url)
+    elif site in tabs:
         with open(filepath, "r") as f:
             lines = f.readlines()
             for line in lines:
-                print(line.strip())
+                print(line)
+        stack.append(url)
     else:
         print("Error: Incorrect URL")
